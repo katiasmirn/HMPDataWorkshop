@@ -1,11 +1,11 @@
-# Working with open-sourse Human Microbiome Project Data: Efficient Data Access and Analysis Workflow
+# Working with open-source Human Microbiome Project Data: Efficient Data Access and Analysis Workflow
 
 # Instructors names and contact information
 
 1. Levi Waldron (@LeviWaldron1), Graduate School of Public Health and Health Policy, City University of New York, New York, NY. 
 email: Levi.Waldron@sph.cuny.edu
 
-2. Ni Zhao, Johns Hopkins University, Baltimore, MD. 
+2. Ni Zhao, Department of Biostatistics, Johns Hopkins University, Baltimore, MD. 
 email: nzhao10@jhu.edu
 
 3. Ekaterina Smirnova (@katiasmirn), Department of Biostatistics, Virginia Commonwealth University, Richmond, VA. email: ekaterina.smirnova@vcuhealth.org
