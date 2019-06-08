@@ -1,0 +1,345 @@
+---
+title: "HMP2Data: Integrative Human Microbiome Data R Bioconductor package" 
+subtitle: "https://github.com/katiasmirn/HMPDataWorkshop" 
+author:
+- Ekaterina Smirnova,  Virginia Commonwealth University\newline
+- Ni Zhao, Johns Hopkins University\newline
+- Mikhail Dozmorov, Virginia Commonwealth University\newline
+- Levi Waldron, Graduate School of Public Health and Health Policy, CUNY
+fontsize: 12pt
+output:
+  beamer_presentation:
+    fig_height: 5
+    fig_width: 8
+    highlight: tango
+    theme: metropolis
+incremental: true
+editor_options:
+    
+    chunk_output_type: console
+always_allow_html: yes    
+---
+
+```{r, echo = FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+```
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE
+)
+```
+
+```{r, echo = FALSE, message=FALSE}
+#clone directory
+#git clone https://github.com/katiasmirn/HMPDataWorkshop
+
+#token 35f0903098e0c9ef30faf7514e382e6bbd5c7179
+#BiocManager::install("HMP2Data")
+
+#devtools::install_github("jstansfield0/HMP2Data", auth_token = "35f0903098e0c9ef30faf7514e382e6bbd5c7179")
+
+library(HMP2Data)
+library(phyloseq)
+library(SummarizedExperiment)
+library(MultiAssayExperiment)
+library(dplyr)
+library(magrittr)
+library(Hmisc)
+library(colorspace)
+library(ade4)
+library(vegan)
+library(gridExtra)
+library(reshape2)
+library(here)
+library(Matrix)
+library(knitr)
+library(kableExtra)
+library(plyr)
+library(tableone)
+
+```
+
+
+# Integrative Human Microbiome Project (iHMP)  https://hmpdacc.org/ihmp/
+
+
+```{r, out.width = '110%', out.height= '50%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "iHMP.jpeg"))
+```
+
+# Novel data: first results just out of press
+
+```{r, out.width = '100%', out.height= '70%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "Nature.jpeg"))
+```
+
+# Human Microbiome Project Data Portal (https://portal.hmpdacc.org/)
+
+```{r, out.width = '100%', out.height= '70%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "DAC.jpeg"))
+```
+
+# Open data, but...
+
+\begin{itemize}
+\item Need \textbf{Aspera client} (or similar) to  download the data  
+  \begin{itemize}
+    \item not every lab/researcher has these expertise 
+  \end{itemize}
+\item After download still need to: 
+     \begin{enumerate}
+       \item map taxonomy ids from the database
+        \item merge with meta data -- not available on the DAC portal
+        \item construct phylogenetic tree
+        \item merge -omics modalities
+    \end{enumerate}
+\end{itemize}
+
+# HMP2Data package 
+
+- Motivated by `HMP16SData` [(\underline{Bioconductor link}) ](http://bioconductor.org/packages/release/data/experiment/html/HMP16SData.html)
+- Currently under review by  Bioconductor
+
+- When accepted  can be installed using
+
+```{r, eval = FALSE}
+BiocManager::install("HMP2Data")
+```
+
+*Note: not available yet*
+
+# Dependence packages
+
+
+```{r, message=FALSE, warning=FALSE}
+library(phyloseq)
+library(SummarizedExperiment)
+library(MultiAssayExperiment)
+library(dplyr)
+library(ggplot2)
+library(UpSetR)
+```
+
+# Development version 
+
+Install from John Stansfield's GitHub 
+
+https://github.com/jstansfield0/HMP2Data 
+
+```{r}
+if(!require("HMP2Data")){
+    BiocStyle::CRANpkg("devtools")
+    devtools::install_github(
+      "jstansfield0/HMP2Data")
+}
+
+library(HMP2Data)
+```
+
+
+# Multi-omics microbiome study pregnancy initiavite (MOMS-PI)  
+
+
+```{r, out.width = '80%', out.height= '70%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "momspi.jpeg"))
+```
+(http://vmc.vcu.edu/momspi)
+
+# Analysis opportunities
+
+- Early results: term and pre-term birth 
+- Only a subset of samples  was used 
+- More available through DAC portal
+- Novel longitudinal and multi-omics models not explored
+- Many opportunities for statistical models development and data exploration! 
+- 16S and cytokines data 
+
+# Data structure
+
+Available as:
+
+\begin{itemize}
+\item \texttt{Matrix} format for metadata, 16S, taxa table
+\item \texttt{Phyloseq}
+\item \texttt{SummarizedExperiment} for cytokines
+\item \texttt{MultiAssayExperiment}:
+  \begin{itemize}
+      \item combine 16S and cytokines 
+  \end{itemize}
+\end{itemize}
+
+# Data objects
+
+16S data as `Phyloseq` object
+
+```{r, message=FALSE, size="tiny"}
+momspi16S_phyloseq <- momspi16S()
+momspi16S_phyloseq
+```
+
+Cytokine data as `SummarizedExperiment` object
+
+```{r, size="tiny"}
+momspiCyto <- momspiCytokines()
+momspiCyto
+```
+
+
+# 
+
+```{r, echo = FALSE}
+#IBD
+
+data("IBD16S_mtx")
+data("IBD16S_tax")
+data("IBD16S_samp")
+IBD <- IBD16S()
+#short term fix: will be updated in the new package version
+sample_data(IBD)$sample_body_site <- "feces"
+sample_data(IBD)$subject_race <- ifelse(sample_data(IBD)$race == "White", "caucasian",
+                                        ifelse(sample_data(IBD)$race == "American Indian or Alaska Native", "american_indian_or_alaska_native", 
+                                               ifelse(sample_data(IBD)$race == "Black or African American", "african_american", "ethnic_other")))
+```
+
+
+```{r, echo = FALSE}
+## T2D
+data("T2D16S_mtx")
+data("T2D16S_tax")
+data("T2D16S_samp")
+T2D <- T2D16S()
+```
+
+
+
+```{r, echo = FALSE}
+tb = list("MOMS-PI 16S" = momspi16S_phyloseq, "MOMS-PI Cytokines" = momspiCyto, "IBD 16S" = IBD, "T2D 16S" = T2D) %>% table_two()
+#tb #produces demographics table, but has to be run in html format
+```
+
+
+```{r, out.width = '500%', out.height= '110%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "Demographics.jpeg"))
+```
+
+# MOMS-PI 16S common samples
+
+
+```{r, fig.height=6, fig.width=10, echo = FALSE}
+# set up data.frame for UpSetR
+momspi_upset <- aggregate(momspi16S_samp$sample_body_site, by = list(momspi16S_samp$subject_id), table)
+tmp <- as.matrix(momspi_upset[, -1])
+tmp <- (tmp > 0) *1
+momspi_upset <- data.frame(patient = momspi_upset$Group.1, tmp)
+
+# plot
+upset(momspi_upset, order.by = 'freq', matrix.color = "blue", text.scale = 2)
+```
+
+# MOMS-PI Cytokines common samples
+
+
+```{r, fig.height=6, fig.width=10, echo = FALSE}
+# set up data.frame for UpSetR
+momspiCyto_upset <- aggregate(momspiCyto_samp$sample_body_site, by = list(momspiCyto_samp$subject_id), table)
+tmp <- as.matrix(momspiCyto_upset[, -1])
+tmp <- (tmp > 0) *1
+momspiCyto_upset <- data.frame(patient = momspiCyto_upset$Group.1, tmp)
+
+# plot
+upset(momspiCyto_upset, order.by = 'freq', matrix.color = "blue", text.scale = 2)
+```
+
+
+# Multiple visits
+
+```{r, fig.height=4, fig.width=7, echo = FALSE}
+# make data.frame for plotting
+plot_visits <- data.frame(study = c(rep("MOMS-PI 16S", nrow(momspi16S_samp)),
+                     rep("MOMS-PI Cytokines", nrow(momspiCyto_samp)),
+                     rep("IBD 16S", nrow(IBD16S_samp)),
+                     rep("T2D 16S", nrow(T2D16S_samp))),
+          visits = c(momspi16S_samp$visit_number,
+                     momspiCyto_samp$visit_number,
+                     IBD16S_samp$visit_number,
+                     T2D16S_samp$visit_number))
+p2 <- ggplot(plot_visits, aes(x = visits, fill = study)) + 
+  geom_histogram(position = "dodge", alpha = 0.7, bins = 30, color = "#00BFC4") + xlim(c(0, 40)) +
+  theme_bw()+
+  theme(legend.position = c(0.8, 0.8), legend.title = element_blank())  + 
+  scale_fill_manual(values=c("IBD 16S" = "seagreen3", 
+                             "MOMS-PI 16S" = "yellow", 
+                             "MOMS-PI Cytokines"= "red", 
+                             "T2D 16S" = "darkred"))+
+  xlab("Visit number") + ylab("Count")
+p2
+```
+
+# Metadata (MOMS-PI) [``dbGap"](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001523.v1.p1#authorized-requests-section)
+
+
+```{r, out.width = '100%', out.height= '90%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "dbGap.jpeg"))
+```
+
+
+
+```{r, out.width = '100%', out.height= '90%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "dbGap2.jpeg"))
+```
+
+
+*Note: not available yet*
+
+# Metadata (IBD): available through the package
+
+```{r, eval = FALSE, size = "tiny"}
+
+Table1Var <- c("subject_gender", "Age.at.diagnosis", "race", "visit_number",
+               "site_name", "Education.Level", "Antibiotics", "BMI")
+
+demo_data = sample_data(IBD)[ ,c("sample_id", "subject_id", Table1Var, "diagnosis")] %>%
+            data.frame()
+
+#all <- CreateTableOne(vars = Table1Var, data = demo_data)
+#kableone(all)
+
+stratified = tableone::CreateTableOne(
+  vars = Table1Var,
+  data = summarytools::unlabel(demo_data), strata = "diagnosis", includeNA = TRUE)
+stratified <- print(stratified, printToggle = FALSE, showAllLevels = FALSE)
+stratified[,!(colnames(stratified) %in% "test")]%>%
+  knitr::kable(format = "html", caption = "Characteristics of the Study Cohort",
+               col.names = c("CD", "nonIBD", 
+                             "UC", "p-value"))%>% 
+  kable_styling("striped", full_width = T)
+
+```
+
+#
+
+```{r, out.width = '700%', out.height= '100%', results='hold', echo = FALSE}
+knitr::include_graphics(file.path(getwd(), "IBDTable.jpeg"))
+```
+
+# Current and future directions
+
+\begin{itemize}
+\item Revise the package to include MOMS-PI  dbGap data
+\item Already implemented in  \texttt{HMP16SData}  
+\item Package vignettes: 
+  \begin{enumerate}
+    \item \texttt{HMP2Data} package introduction
+    \item Analysis workflow for MOMS-PI, IBD and T2D studies
+    \item Multi-omics analysis combining 16S and cytokines data
+  \end{enumerate}
+\item June 25: Bioconductor 2019 workshop on \texttt{HMP16SData} and \texttt{HMP16SData} packages
+\end{itemize}
