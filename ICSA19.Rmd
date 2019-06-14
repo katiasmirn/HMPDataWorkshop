@@ -116,10 +116,9 @@ BiocManager::install("HMP2Data")
 
 *Note: not available yet*
 
-# Dependence packages
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 library(phyloseq)
 library(SummarizedExperiment)
 library(MultiAssayExperiment)
@@ -161,6 +160,11 @@ knitr::include_graphics(file.path(getwd(), "momspi.jpeg"))
 - Novel longitudinal and multi-omics models not explored
 - Many opportunities for statistical models development and data exploration! 
 - 16S and cytokines data 
+
+Detailed study design:
+
+- https://www.nature.com/articles/s41591-019-0450-2
+
 
 # Data structure
 
@@ -224,6 +228,7 @@ T2D <- T2D16S()
 tb = list("MOMS-PI 16S" = momspi16S_phyloseq, "MOMS-PI Cytokines" = momspiCyto, "IBD 16S" = IBD, "T2D 16S" = T2D) %>% table_two()
 #tb #produces demographics table, but has to be run in html format
 ```
+
 
 
 ```{r, out.width = '500%', out.height= '110%', results='hold', echo = FALSE}
@@ -301,6 +306,11 @@ knitr::include_graphics(file.path(getwd(), "dbGap2.jpeg"))
 
 # Metadata (IBD): available through the package
 
+Published results:
+
+https://www.nature.com/articles/s41586-019-1237-9
+
+
 ```{r, eval = FALSE, size = "tiny"}
 
 Table1Var <- c("subject_gender", "Age.at.diagnosis", "race", "visit_number",
@@ -318,8 +328,8 @@ stratified = tableone::CreateTableOne(
 stratified <- print(stratified, printToggle = FALSE, showAllLevels = FALSE)
 stratified[,!(colnames(stratified) %in% "test")]%>%
   knitr::kable(format = "html", caption = "Characteristics of the Study Cohort",
-               col.names = c("CD", "nonIBD", 
-                             "UC", "p-value"))%>% 
+               col.names = c("Crohn’s disease (CD)", "nonIBD", 
+                             "ulcerative colitis  (UC)", "p-value"))%>% 
   kable_styling("striped", full_width = T)
 
 ```
