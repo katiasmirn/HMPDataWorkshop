@@ -4,6 +4,7 @@ subtitle: "https://github.com/katiasmirn/HMPDataWorkshop"
 author:
 - Ekaterina Smirnova,  Virginia Commonwealth University\newline
 - Ni Zhao, Johns Hopkins University\newline
+- Jennifer Fettweis, Virginia Commonwealth University\newline
 - Mikhail Dozmorov, Virginia Commonwealth University\newline
 - Levi Waldron, Graduate School of Public Health and Health Policy, CUNY
 fontsize: 12pt
