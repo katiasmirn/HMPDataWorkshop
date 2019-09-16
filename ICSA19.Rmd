@@ -114,7 +114,7 @@ knitr::include_graphics(file.path(getwd(), "DAC.jpeg"))
 BiocManager::install("HMP2Data")
 ```
 
-*Note: not available yet*
+
 
 
 
@@ -302,7 +302,7 @@ knitr::include_graphics(file.path(getwd(), "dbGap2.jpeg"))
 ```
 
 
-*Note: not available yet*
+
 
 # Metadata (IBD): available through the package
 
@@ -339,6 +339,25 @@ stratified[,!(colnames(stratified) %in% "test")]%>%
 ```{r, out.width = '700%', out.height= '100%', results='hold', echo = FALSE}
 knitr::include_graphics(file.path(getwd(), "IBDTable.jpeg"))
 ```
+
+# Getting started: useful links
+
+1. Bioconductor 2019 workshop materials:
+
+http://biocworkshops2019.bioconductor.org.s3-website-us-east-1.amazonaws.com/page/MicrobiomeWorkshop__MicrobiomeWorkshop/
+
+2. Rmarkdown files for the workshop materials
+
+https://github.com/waldronlab/MicrobiomeWorkshop
+
+3. HMP2Data package
+
+https://bioconductor.org/packages/devel/data/experiment/html/HMP2Data.html
+
+4. Slides for this presentation
+
+https://github.com/katiasmirn/HMPDataWorkshop
+
 
 # Current and future directions
 
